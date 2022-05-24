@@ -51,14 +51,15 @@ bot = telebot.TeleBot(config2.TOKEN)
 
 @bot.message_handler(commands=['start'])
 def hello(message):
-    bot.send_message(message.chat.id, "Что бы поорать, отправь /jokes")
+    bot.send_message(message.chat.id, "Что бы поорать, отправь /help")
 
 
-@bot.message_handler(commands=['jokes'])
+@bot.message_handler(commands=['help'])
 def help(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     memes = types.KeyboardButton('Jokes')
-    markup.add(memes)
+    anime = types.KeyboardButton('Anime')
+    markup.add(memes, anime)
     bot.send_message(message.chat.id, 'Нажимай', reply_markup=markup)
 
 
@@ -66,8 +67,12 @@ def help(message):
 def jokes(message):
     if message.text.lower() == 'jokes':
         bot.send_message(message.chat.id, parser(f'{URL}{random.randint(1, 1100)}'))
+    elif message.text.lower() == 'anime':
+        anime_photo()
+        photo = open('1.jpg', 'rb')
+        bot.send_photo(message.chat.id, photo)
     else:
-        bot.send_message(message.chat.id, "Введи /jokes")
+        bot.send_message(message.chat.id, "Введи /help")
 
 
 bot.polling(skip_pending=True)
