@@ -56,6 +56,7 @@ def hello(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
+    # инициализируем кнопки у бота
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     memes = types.KeyboardButton('Jokes')
     anime = types.KeyboardButton('Anime')
