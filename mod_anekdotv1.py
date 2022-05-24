@@ -8,6 +8,32 @@ from bs4 import BeautifulSoup
 URL = 'https://baneks.ru/'
 
 
+def anime_photo():
+    """
+    Парсит рандомную аниме фотку и сохраняет ее
+    с именем 1.jpg
+    :return: None
+    """
+    image_list = []
+    image_number = 1
+    link = f"https://zastavok.net/anime/{random.randint(1, 11)}"
+
+    responce = requests.get(f'{link}').text
+    soup = BeautifulSoup(responce, 'lxml')
+    block = soup.find("div", class_='block-photo')
+    all_image = block.find_all('div', class_='short_full')
+
+    for image in all_image:
+        image_link = image.find('img').get("src")
+        image_list.append(image_link)
+
+    url = f'https://zastavok.net/{image_list[random.randint(1, 17)]}'
+    r = requests.get(url, stream=True)
+    with open(f'{image_number}.jpg', 'bw') as file:
+        for chunk in r.iter_content(8192):
+            file.write(chunk)
+
+
 def parser(url):
     """
     парсит сайт с анекдотами
