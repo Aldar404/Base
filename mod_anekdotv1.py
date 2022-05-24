@@ -66,6 +66,8 @@ def help(message):
 
 @bot.message_handler(content_types=['text'])
 def jokes(message):
+    # на команду jokes - отправляем рандомный анекдот
+    # на команду аниме отправляем рандомную аниме картинку
     if message.text.lower() == 'jokes':
         bot.send_message(message.chat.id, parser(f'{URL}{random.randint(1, 1100)}'))
     elif message.text.lower() == 'anime':
