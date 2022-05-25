@@ -5,27 +5,7 @@ from telebot import types
 import config2
 import schedule
 from bs4 import BeautifulSoup
-
 URL = 'https://baneks.ru/'
-
-
-def greeting():
-    """
-    Рассылка Good Morning по id из списка
-    chat_id.txt
-    """
-    for id in open('chat_id.txt', 'r').readlines():
-        bot.send_message(int(id), "Good Morning!")
-
-
-def greeting_in_morning():
-    """
-    Функция отправляет сообщение(greeting)
-     в указанное время
-    """
-    schedule.every().day.at('14:16').do(greeting)
-    while True:
-        schedule.run_pending()
 
 
 def anime_photo():
@@ -54,7 +34,7 @@ def anime_photo():
             file.write(chunk)
 
 
-def parser(url):
+def jokes_parser(url):
     """
     парсит сайт с анекдотами
     :param url: baneks.ru сайт с анекдотами
@@ -66,48 +46,73 @@ def parser(url):
     return anekdots.get_text('\n', strip=True)
 
 
-bot = telebot.TeleBot(config2.TOKEN)
+def telegram_bot():
+    """функция работы телеграм бота"""
+
+    def greeting():
+        """
+        Рассылка Good Morning по id из списка
+        chat_id.txt
+        """
+        for ids in open('chat_id.txt', 'r').readlines():
+            bot.send_message(int(ids), "Good Morning!")
 
 
-@bot.message_handler(commands=['start'])
-def hello(message):
-    bot.send_message(message.chat.id, "Что бы поорать, отправь /help")
+    def greeting_in_morning():
+        """
+        Функция отправляет сообщение(greeting)
+         в указанное время
+        """
+        schedule.every().day.at('20:47').do(greeting)
+        while True:
+            schedule.run_pending()
 
+    # инициализируем телеграм бота
+    bot = telebot.TeleBot(config2.TOKEN)
 
-@bot.message_handler(commands=['help'])
-def help(message):
-    # инициализируем кнопки у бота
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    memes = types.KeyboardButton('Jokes')
-    anime = types.KeyboardButton('Anime')
-    markup.add(memes, anime)
-    bot.send_message(message.chat.id, 'Нажимай', reply_markup=markup)
+    @bot.message_handler(commands=['start'])
+    def hello(message):
+        bot.send_message(message.chat.id, "Что бы поорать, отправь /help")
 
+    @bot.message_handler(commands=['help'])
+    def helps(message):
+        # инициализируем кнопки у бота
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        memes = types.KeyboardButton('Jokes')
+        anime = types.KeyboardButton('Anime')
+        markup.add(memes, anime)
+        bot.send_message(message.chat.id, 'Нажимай', reply_markup=markup)
 
-@bot.message_handler(content_types=['text'])
-def jokes(message):
-    # на команду jokes - отправляем рандомный анекдот
-    # на команду аниме отправляем рандомную аниме картинку
-    # на команду subscribe записываем id в базу данных,
-    # если id есть в базе пишем что уже подписаны.
-    if message.text.lower() == 'jokes':
-        bot.send_message(message.chat.id, parser(f'{URL}{random.randint(1, 1100)}'))
-    elif message.text.lower() == 'anime':
-        anime_photo()
-        photo = open('1.jpg', 'rb')
-        bot.send_photo(message.chat.id, photo)
-    elif message.text.lower() == "subscribe":
-        for id in open("chat_id.txt", 'r').readlines():
-            if int(id) == int(message.chat.id):
-                bot.send_message(message.chat.id, "Вы уже подписаны на рассылку")
-                break
+    @bot.message_handler(content_types=['text'])
+    def jokes(message):
+        # на команду jokes - отправляем рандомный анекдот
+        # на команду аниме отправляем рандомную аниме картинку
+        # на команду subscribe записываем id в базу данных,
+        # если id есть в базе пишем что уже подписаны.
+        if message.text.lower() == 'jokes':
+            bot.send_message(message.chat.id, jokes_parser(f'{URL}{random.randint(1, 1100)}'))
+        elif message.text.lower() == 'anime':
+            anime_photo()
+            photo = open('1.jpg', 'rb')
+            bot.send_photo(message.chat.id, photo)
+        elif message.text.lower() == "subscribe":
+            for ids in open("chat_id.txt", 'r').readlines():
+                if int(ids) == int(message.chat.id):
+                    bot.send_message(message.chat.id, "Вы уже подписаны на рассылку")
+                    break
+            else:
+                with open("chat_id.txt", "a+") as chat_id:
+                    print(message.chat.id, file=chat_id)
+                    bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку")
         else:
-            with open("chat_id.txt", "a+") as chat_id:
-                print(message.chat.id, file=chat_id)
-                bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку")
-    else:
-        bot.send_message(message.chat.id, "Введи /help")
+            bot.send_message(message.chat.id, "Введи /help")
+
+    bot.polling(skip_pending=True)
 
 
-bot.polling(skip_pending=True)
+def main():
+    telegram_bot()
 
+
+if __name__ == '__main__':
+    main()
