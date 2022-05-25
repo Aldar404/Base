@@ -9,12 +9,23 @@ from bs4 import BeautifulSoup
 URL = 'https://baneks.ru/'
 
 
+def greeting():
+    """
+    Рассылка Good Morning по id из списка
+    chat_id.txt
+    """
+    for id in open('chat_id.txt', 'r').readlines():
+        bot.send_message(int(id), "Good Morning!")
+
+
 def greeting_in_morning():
-   """
-   Функция отправляет сообщение каждое утро
-   :return: None
-   """
-pass
+    """
+    Функция отправляет сообщение(greeting)
+     в указанное время
+    """
+    schedule.every().day.at('14:16').do(greeting)
+    while True:
+        schedule.run_pending()
 
 
 def anime_photo():

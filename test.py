@@ -1,6 +1,15 @@
-id = "606234127"
-for i in open("chat_id.txt", 'r').readlines():
-    if int(i) == int(id):
-        print("yes")
-    else:
-        print("no")
+import schedule
+
+
+def greeting():
+    print("good morning")
+
+
+def do_greeting():
+    schedule.every().day.at("14:13").do(greeting)
+    while True:
+        schedule.run_pending()
+
+
+if __name__ == "__main__":
+    do_greeting()
