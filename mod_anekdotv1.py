@@ -3,9 +3,18 @@ import random
 import telebot
 from telebot import types
 import config2
+import schedule
 from bs4 import BeautifulSoup
 
 URL = 'https://baneks.ru/'
+
+
+def greeting_in_morning():
+   """
+   Функция отправляет сообщение каждое утро
+   :return: None
+   """
+pass
 
 
 def anime_photo():
@@ -68,12 +77,23 @@ def help(message):
 def jokes(message):
     # на команду jokes - отправляем рандомный анекдот
     # на команду аниме отправляем рандомную аниме картинку
+    # на команду subscribe записываем id в базу данных,
+    # если id есть в базе пишем что уже подписаны.
     if message.text.lower() == 'jokes':
         bot.send_message(message.chat.id, parser(f'{URL}{random.randint(1, 1100)}'))
     elif message.text.lower() == 'anime':
         anime_photo()
         photo = open('1.jpg', 'rb')
         bot.send_photo(message.chat.id, photo)
+    elif message.text.lower() == "subscribe":
+        for id in open("chat_id.txt", 'r').readlines():
+            if int(id) == int(message.chat.id):
+                bot.send_message(message.chat.id, "Вы уже подписаны на рассылку")
+                break
+        else:
+            with open("chat_id.txt", "a+") as chat_id:
+                print(message.chat.id, file=chat_id)
+                bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку")
     else:
         bot.send_message(message.chat.id, "Введи /help")
 
