@@ -8,6 +8,18 @@ from bs4 import BeautifulSoup
 URL = 'https://baneks.ru/'
 
 
+def random_dog():
+    """
+    Парсит рандомную фотографию собаки и сохраняет с именем dog.jpg
+    :return: None
+    """
+    url = f'https://loremflickr.com/320/240/dog'
+    r = requests.get(url, stream=True)
+    with open(f'dog.jpg', 'bw') as file:
+        for chunk in r.iter_content(8192):
+            file.write(chunk)
+
+
 def anime_photo():
     """
     Парсит рандомную аниме фотку и сохраняет ее
@@ -16,7 +28,7 @@ def anime_photo():
     """
     image_list = []
     image_number = 1
-    link = f"https://zastavok.net/anime/{random.randint(1, 11)}"
+    link = f"https://zastavok.net/anime/{random.randrange(11)}"
 
     responce = requests.get(f'{link}').text
     soup = BeautifulSoup(responce, 'lxml')
@@ -27,7 +39,7 @@ def anime_photo():
         image_link = image.find('img').get("src")
         image_list.append(image_link)
 
-    url = f'https://zastavok.net/{image_list[random.randint(1, 17)]}'
+    url = f'https://zastavok.net/{image_list[random.randrange(18)]}'
     r = requests.get(url, stream=True)
     with open(f'{image_number}.jpg', 'bw') as file:
         for chunk in r.iter_content(8192):
@@ -46,6 +58,14 @@ def jokes_parser(url):
     return anekdots.get_text('\n', strip=True)
 
 
+def wisdom_parser():
+    r = requests.get("https://randstuff.ru/saying/")
+    soup = BeautifulSoup(r.text, 'html.parser')
+    wisdom = soup.find('div', id="saying")
+    result = wisdom.get_text(strip=True)
+    return result
+    # убрать в конце результата строчку "глупомудро"
+
 def telegram_bot():
     """функция работы телеграм бота"""
 
@@ -57,13 +77,13 @@ def telegram_bot():
         for ids in open('chat_id.txt', 'r').readlines():
             bot.send_message(int(ids), "Good Morning!")
 
-
     def greeting_in_morning():
         """
         Функция отправляет сообщение(greeting)
          в указанное время
         """
-        schedule.every().day.at('20:47').do(greeting)
+        # нужна ассинхронность
+        schedule.every().day.at('19:36').do(greeting)
         while True:
             schedule.run_pending()
 
@@ -90,11 +110,15 @@ def telegram_bot():
         # на команду subscribe записываем id в базу данных,
         # если id есть в базе пишем что уже подписаны.
         if message.text.lower() == 'jokes':
-            bot.send_message(message.chat.id, jokes_parser(f'{URL}{random.randint(1, 1100)}'))
+            bot.send_message(message.chat.id, jokes_parser(f'{URL}{random.randrange(1100)}'))
         elif message.text.lower() == 'anime':
             anime_photo()
             photo = open('1.jpg', 'rb')
             bot.send_photo(message.chat.id, photo)
+        elif message.text.lower() == "dog":
+            random_dog()
+            dog_photo = open("dog.jpg", 'rb')
+            bot.send_photo(message.chat.id, dog_photo, wisdom_parser())
         elif message.text.lower() == "subscribe":
             for ids in open("chat_id.txt", 'r').readlines():
                 if int(ids) == int(message.chat.id):
@@ -108,6 +132,7 @@ def telegram_bot():
             bot.send_message(message.chat.id, "Введи /help")
 
     bot.polling(skip_pending=True)
+    # greeting_in_morning()
 
 
 def main():
