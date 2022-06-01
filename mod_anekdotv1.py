@@ -61,10 +61,10 @@ def jokes_parser(url):
 def wisdom_parser():
     r = requests.get("https://randstuff.ru/saying/")
     soup = BeautifulSoup(r.text, 'html.parser')
-    wisdom = soup.find('div', id="saying")
+    wisdom = soup.find('td')
     result = wisdom.get_text(strip=True)
     return result
-    # убрать в конце результата строчку "глупомудро"
+
 
 def telegram_bot():
     """функция работы телеграм бота"""
@@ -100,7 +100,8 @@ def telegram_bot():
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         memes = types.KeyboardButton('Jokes')
         anime = types.KeyboardButton('Anime')
-        markup.add(memes, anime)
+        wisdom = types.KeyboardButton("Dog's Wisdoms")
+        markup.row(memes, anime).add(wisdom)
         bot.send_message(message.chat.id, 'Нажимай', reply_markup=markup)
 
     @bot.message_handler(content_types=['text'])
@@ -115,7 +116,7 @@ def telegram_bot():
             anime_photo()
             photo = open('1.jpg', 'rb')
             bot.send_photo(message.chat.id, photo)
-        elif message.text.lower() == "dog":
+        elif message.text.lower() == "dog's wisdoms":
             random_dog()
             dog_photo = open("dog.jpg", 'rb')
             bot.send_photo(message.chat.id, dog_photo, wisdom_parser())
