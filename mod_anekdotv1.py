@@ -86,7 +86,6 @@ def telegram_bot():
         Функция отправляет сообщение(greeting)
          в указанное время
         """
-        # нужна ассинхронность
         schedule.every().day.at('10:00').do(greeting)
         while True:
             schedule.run_pending()
@@ -104,8 +103,8 @@ def telegram_bot():
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         memes = types.KeyboardButton('Jokes')
         anime = types.KeyboardButton('Anime')
-        wisdom = types.KeyboardButton("Dog's Wisdoms")
-        markup.row(memes, anime).add(wisdom)
+        subscribe = types.KeyboardButton("Subscribe")
+        markup.row(memes, anime).add(subscribe)
         bot.send_message(message.chat.id, 'Нажимай', reply_markup=markup)
 
     @bot.message_handler(content_types=['text'])
@@ -120,7 +119,7 @@ def telegram_bot():
             anime_photo()
             photo = open('1.jpg', 'rb')
             bot.send_photo(message.chat.id, photo)
-        elif message.text.lower() == "dog's wisdoms":
+        elif message.text.lower() == "dog wisdoms":
             random_dog()
             dog_photo = open("dog.jpg", 'rb')
             bot.send_photo(message.chat.id, dog_photo, wisdom_parser())
@@ -132,7 +131,7 @@ def telegram_bot():
             else:
                 with open("chat_id.txt", "a+") as chat_id:
                     print(message.chat.id, file=chat_id)
-                    bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку")
+                    bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку, в 10:00 вас ждет мудрость собаки")
         else:
             bot.send_message(message.chat.id, "Введи /help")
     # тред с функцией greeting_in_morning
