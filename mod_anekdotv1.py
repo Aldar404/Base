@@ -5,6 +5,7 @@ from telebot import types
 import config2
 import schedule
 from bs4 import BeautifulSoup
+import threading
 URL = 'https://baneks.ru/'
 
 
@@ -76,6 +77,9 @@ def telegram_bot():
         """
         for ids in open('chat_id.txt', 'r').readlines():
             bot.send_message(int(ids), "Good Morning!")
+            random_dog()
+            dog_photo = open("dog.jpg", 'rb')
+            bot.send_photo(int(ids), dog_photo, wisdom_parser())
 
     def greeting_in_morning():
         """
@@ -83,7 +87,7 @@ def telegram_bot():
          в указанное время
         """
         # нужна ассинхронность
-        schedule.every().day.at('19:36').do(greeting)
+        schedule.every().day.at('10:00').do(greeting)
         while True:
             schedule.run_pending()
 
@@ -131,9 +135,11 @@ def telegram_bot():
                     bot.send_message(message.chat.id, "Вы подписались на утренюю рассылку")
         else:
             bot.send_message(message.chat.id, "Введи /help")
+    # тред с функцией greeting_in_morning
+    thr = threading.Thread(target=greeting_in_morning)
+    thr.start()
 
     bot.polling(skip_pending=True)
-    # greeting_in_morning()
 
 
 def main():
